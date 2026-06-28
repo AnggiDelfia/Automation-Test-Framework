@@ -1,4 +1,4 @@
-# Automation Test Framework
+# Automation-Test-Framework
 
 Framework automation test Java untuk Web UI dan API dalam satu repository. Test scenario ditulis dengan format Gherkin dan dijalankan memakai Cucumber.
 
