@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.example'
+version = '1.0.0'
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+ext {
+    cucumberVersion = '7.18.1'
+    junitPlatformVersion = '1.10.3'
+    seleniumVersion = '4.23.1'
+    restAssuredVersion = '5.5.0'
+    assertjVersion = '3.26.3'
+    webDriverManagerVersion = '5.9.2'
+    jacksonVersion = '2.17.2'
+}
+
+dependencies {
+    testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
+    testImplementation "io.cucumber:cucumber-junit-platform-engine:${cucumberVersion}"
+    testImplementation "org.junit.platform:junit-platform-suite:${junitPlatformVersion}"
+    testImplementation "org.seleniumhq.selenium:selenium-java:${seleniumVersion}"
+    testImplementation "io.github.bonigarcia:webdrivermanager:${webDriverManagerVersion}"
+    testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+    testImplementation "org.assertj:assertj-core:${assertjVersion}"
+    testImplementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+    testRuntimeOnly "org.slf4j:slf4j-simple:2.0.13"
+}
+
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+def configureCucumberTask = { Test task, String tagExpression, String reportName ->
+    task.group = 'verification'
+    task.description = "Run Cucumber tests tagged with ${tagExpression}"
+    task.testClassesDirs = sourceSets.test.output.classesDirs
+    task.classpath = sourceSets.test.runtimeClasspath
+    task.useJUnitPlatform()
+    task.systemProperty 'cucumber.filter.tags', tagExpression
+    task.systemProperty 'cucumber.plugin',
+            "pretty,html:build/reports/cucumber/${reportName}.html,json:build/reports/cucumber/${reportName}.json"
+    task.systemProperty 'cucumber.glue', 'com.example.framework'
+}
+
+tasks.register('apiTest', Test) {
+    configureCucumberTask(delegate, '@api', 'api-test-report')
+}
+
+tasks.register('webTest', Test) {
+    configureCucumberTask(delegate, '@web', 'web-test-report')
+    systemProperty 'browser', System.getProperty('browser', 'chrome')
+    systemProperty 'headless', System.getProperty('headless', 'true')
+}
+
+test {
+    systemProperty 'cucumber.plugin',
+            'pretty,html:build/reports/cucumber/all-test-report.html,json:build/reports/cucumber/all-test-report.json'
+    systemProperty 'cucumber.glue', 'com.example.framework'
+}

@@ -1,0 +1,37 @@
+name: Automation Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Run API tests
+        run: ./gradlew apiTest
+        env:
+          DUMMY_API_APP_ID: ${{ secrets.DUMMY_API_APP_ID || '63a804408eb0cb069b57e43a' }}
+
+      - name: Run Web UI tests
+        run: ./gradlew webTest -Dheadless=true
+
+      - name: Upload Cucumber reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-reports
+          path: build/reports/cucumber
