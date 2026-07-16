@@ -15,3 +15,9 @@ Feature: DummyAPI user endpoint
     When I delete the created user
     Then the API response status code should be 200
     And the delete response should contain the deleted user id
+
+  Scenario: Fail to create user when required email is missing
+    Given an invalid user payload without email
+    When I create the user using DummyAPI
+    Then the API response status code should be 400
+    And the API error response should not be empty

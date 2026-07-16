@@ -29,6 +29,14 @@ public class UserApiSteps {
         userPayload.put("email", "automation.tester." + uniqueSuffix + "@mail.com");
     }
 
+    @Given("an invalid user payload without email")
+    public void anInvalidUserPayloadWithoutEmail() {
+        userPayload.clear();
+        userPayload.put("title", "mrs");
+        userPayload.put("firstName", "Negative");
+        userPayload.put("lastName", "Case");
+    }
+
     @When("I create the user using DummyAPI")
     public void iCreateTheUserUsingDummyApi() {
         response = dummyApiClient.createUser(userPayload);
@@ -76,5 +84,10 @@ public class UserApiSteps {
     @And("the delete response should contain the deleted user id")
     public void theDeleteResponseShouldContainTheDeletedUserId() {
         assertThat(response.jsonPath().getString("id")).isEqualTo(createdUserId);
+    }
+
+    @And("the API error response should not be empty")
+    public void theApiErrorResponseShouldNotBeEmpty() {
+        assertThat(response.asString()).isNotBlank();
     }
 }
